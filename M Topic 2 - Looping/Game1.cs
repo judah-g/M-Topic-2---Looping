@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
 
 namespace M_Topic_2___Looping
 {
@@ -8,6 +10,12 @@ namespace M_Topic_2___Looping
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+
+        List<Rectangle> bugs = new List<Rectangle>();
+        List<Texture2D> bugTextures = new List<Texture2D>();
+        Random random = new Random();
+        Rectangle window = new Rectangle(0, 0, 800, 500);
+        Texture2D bedTexture;
 
         public Game1()
         {
@@ -18,7 +26,9 @@ namespace M_Topic_2___Looping
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            for (int i = 0; i < 10; i++)
+                bugs.Add(new Rectangle(random.Next(0, window.Width), random.Next(0, window.Height), 50, 50));
+
 
             base.Initialize();
         }
@@ -27,7 +37,9 @@ namespace M_Topic_2___Looping
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            for (int i = 0; i < bugs.Count; i++)
+                bugTextures.Add(Content.Load<Texture2D>($"bug{random.Next(1, 9)}"));
+            bedTexture = Content.Load<Texture2D>("bugbed");
         }
 
         protected override void Update(GameTime gameTime)
@@ -44,7 +56,13 @@ namespace M_Topic_2___Looping
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            _spriteBatch.Begin();
+
+            _spriteBatch.Draw(bedTexture, new Rectangle(0, 0, window.Width, window.Height), Color.White);
+            for (int i = 0; i < bugs.Count; i++)
+                _spriteBatch.Draw(bugTextures[i], bugs[i], Color.White);
+
+            _spriteBatch.End();
 
             base.Draw(gameTime);
         }
