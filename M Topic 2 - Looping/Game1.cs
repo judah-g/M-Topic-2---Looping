@@ -11,15 +11,17 @@ namespace M_Topic_2___Looping
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        List<Rectangle> bugs = new List<Rectangle>();
-        List<int> x = new List<int>(), y = new List<int>();
+        List<Rectangle> bugs = new List<Rectangle>(), deadBugs = new List<Rectangle>();
+        List<int> x = new List<int>(), y = new List<int>(), size = new List<int>();
+        List<float> deathTimer = new List<float>();
         Rectangle window = new Rectangle(0, 0, 800, 500);
+        MouseState mouseState, prevMouseState;
 
-        List<Texture2D> bugTextures = new List<Texture2D>();
-        Texture2D bedTexture;
+        List<Texture2D> bugTextures = new List<Texture2D>(), deadBugTextures = new List<Texture2D>();
+        Texture2D bedTexture, downSwatterTexture, upSwatterTexture;
 
         Random random = new Random();
-        int movementHelper;
+        int movementHelper, textureHelper;
 
         public Game1()
         {
@@ -34,7 +36,8 @@ namespace M_Topic_2___Looping
             {
                 x.Add(random.Next(0, window.Width - 50));
                 y.Add(random.Next(0, window.Height - 50));
-                bugs.Add(new Rectangle(x[i], y[i], 50, 50));
+                size.Add(random.Next(25, 60));
+                bugs.Add(new Rectangle(x[i], y[i], size[i], size[i]));
             }
 
 
@@ -46,14 +49,23 @@ namespace M_Topic_2___Looping
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             for (int i = 0; i < bugs.Count; i++)
-                bugTextures.Add(Content.Load<Texture2D>($"bug{random.Next(1, 9)}"));
+            {
+                textureHelper = random.Next(1, 9);
+                bugTextures.Add(Content.Load<Texture2D>($"bug{textureHelper}"));
+            }
             bedTexture = Content.Load<Texture2D>("truebed");
+            upSwatterTexture = Content.Load<Texture2D>("flyup");
+            downSwatterTexture = Content.Load<Texture2D>("flydown");
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+            prevMouseState = mouseState;
+            mouseState = Mouse.GetState();
+
             //movement
             for (int i = 0; i < bugs.Count; i++)
             {
@@ -68,7 +80,7 @@ namespace M_Topic_2___Looping
                 else if (movementHelper == 3)
                     y[i] -= random.Next(0, 3);
 
-                bugs[i] = new Rectangle(x[i], y[i], 50, 50);
+                bugs[i] = new Rectangle(x[i], y[i], size[i], size[i]);
             }
 
             //collision
@@ -100,7 +112,7 @@ namespace M_Topic_2___Looping
                             y[j] += 1;
                         }
                     }
-                    bugs[j] = new Rectangle(x[j], y[j], 50, 50);
+                    bugs[j] = new Rectangle(x[j], y[j], size[j], size[j]);
                 }
 
                 if (bugs[i].Left < 0)
@@ -113,9 +125,39 @@ namespace M_Topic_2___Looping
                 else if (bugs[i].Bottom > window.Height)
                     y[i] = window.Height - bugs[i].Height - 1;
 
-                bugs[i] = new Rectangle(x[i], y[i], 50, 50);
+                bugs[i] = new Rectangle(x[i], y[i], size[i], size[i]);
             }
 
+            //clicking
+            if (mouseState.LeftButton == ButtonState.Pressed)
+            {
+                for (int i = 0; i < bugs.Count; i++)
+                {
+                    if (bugs[i].Contains(mouseState.Position))
+                    {
+                        deadBugs.Add(bugs[i]);
+                        deathTimer.Add((float)gameTime.ElapsedGameTime.TotalSeconds);
+
+                        x[i] = random.Next(0, window.Width - 50);
+                        y[i] = random.Next(0, window.Height - 50);
+                        size[i] = random.Next(25, 60);
+                        bugs[i] = new Rectangle(x[i], y[i], size[i], size[i]);
+                        
+                    }
+                }
+            }
+
+            //dead bug logic
+            for (int i = 0; i < deadBugs.Count; i++)
+            {
+                deathTimer[i] += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (deathTimer[i] > 5)
+                {
+                    deadBugs.RemoveAt(i);
+                    deathTimer.RemoveAt(i);
+                    i--;
+                }
+            }
 
             base.Update(gameTime);
         }
@@ -127,8 +169,16 @@ namespace M_Topic_2___Looping
             _spriteBatch.Begin();
 
             _spriteBatch.Draw(bedTexture, new Rectangle(-40, -60, window.Width + 300, window.Height + 300), Color.White);
+
+            for (int i = 0; i < deadBugs.Count; i++)
+                _spritebatch.Draw(deadBugTextures[i], )
             for (int i = 0; i < bugs.Count; i++)
                 _spriteBatch.Draw(bugTextures[i], bugs[i], Color.White);
+
+            if (mouseState.LeftButton == ButtonState.Pressed)
+                _spriteBatch.Draw(downSwatterTexture, new Rectangle(mouseState.X - 32, mouseState.Y - 20, 64, 64), Color.White);
+            else
+                _spriteBatch.Draw(upSwatterTexture, new Rectangle(mouseState.X - 32, mouseState.Y - 20, 64, 64), Color.White);
 
             _spriteBatch.End();
 
