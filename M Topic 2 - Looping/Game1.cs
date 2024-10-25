@@ -12,7 +12,7 @@ namespace M_Topic_2___Looping
         private SpriteBatch _spriteBatch;
 
         List<Rectangle> bugs = new List<Rectangle>(), deadBugs = new List<Rectangle>();
-        List<int> x = new List<int>(), y = new List<int>(), size = new List<int>();
+        List<int> x = new List<int>(), y = new List<int>(), size = new List<int>(), textureNumber = new List<int>();
         List<float> deathTimer = new List<float>();
         Rectangle window = new Rectangle(0, 0, 800, 500);
         MouseState mouseState, prevMouseState;
@@ -21,7 +21,7 @@ namespace M_Topic_2___Looping
         Texture2D bedTexture, downSwatterTexture, upSwatterTexture;
 
         Random random = new Random();
-        int movementHelper, textureHelper;
+        int movementHelper;
 
         public Game1()
         {
@@ -50,8 +50,8 @@ namespace M_Topic_2___Looping
 
             for (int i = 0; i < bugs.Count; i++)
             {
-                textureHelper = random.Next(1, 9);
-                bugTextures.Add(Content.Load<Texture2D>($"bug{textureHelper}"));
+                textureNumber.Add(random.Next(1, 9));
+                bugTextures.Add(Content.Load<Texture2D>($"bug{textureNumber[i]}"));
             }
             bedTexture = Content.Load<Texture2D>("truebed");
             upSwatterTexture = Content.Load<Texture2D>("flyup");
@@ -137,12 +137,15 @@ namespace M_Topic_2___Looping
                     {
                         deadBugs.Add(bugs[i]);
                         deathTimer.Add((float)gameTime.ElapsedGameTime.TotalSeconds);
+                        deadBugTextures.Add(Content.Load<Texture2D>($"bugdead{textureNumber[i]}"));
 
                         x[i] = random.Next(0, window.Width - 50);
                         y[i] = random.Next(0, window.Height - 50);
                         size[i] = random.Next(25, 60);
                         bugs[i] = new Rectangle(x[i], y[i], size[i], size[i]);
-                        
+
+                        textureNumber[i] = random.Next(1, 9);
+                        bugTextures[i] = Content.Load<Texture2D>($"bug{textureNumber[i]}");
                     }
                 }
             }
@@ -151,13 +154,27 @@ namespace M_Topic_2___Looping
             for (int i = 0; i < deadBugs.Count; i++)
             {
                 deathTimer[i] += (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (deathTimer[i] > 5)
+                if (deathTimer[i] > 2)
                 {
                     deadBugs.RemoveAt(i);
                     deathTimer.RemoveAt(i);
+                    deadBugTextures.RemoveAt(i);
                     i--;
                 }
             }
+
+            if (mouseState.ScrollWheelValue == prevMouseState.ScrollWheelValue + 120)
+            {
+                x.Add(random.Next(0, window.Width - 50));
+                y.Add(random.Next(0, window.Height - 50));
+                size.Add(random.Next(25, 60));
+                bugs.Add(new Rectangle(x[x.Count - 1], y[y.Count - 1], size[size.Count - 1], size[size.Count - 1]));
+
+                textureNumber.Add(random.Next(1, 9));
+                bugTextures.Add(Content.Load<Texture2D>($"bug{textureNumber[textureNumber.Count - 1]}"));
+            }
+
+            Window.Title = mouseState.ScrollWheelValue.ToString();
 
             base.Update(gameTime);
         }
@@ -171,7 +188,7 @@ namespace M_Topic_2___Looping
             _spriteBatch.Draw(bedTexture, new Rectangle(-40, -60, window.Width + 300, window.Height + 300), Color.White);
 
             for (int i = 0; i < deadBugs.Count; i++)
-                _spritebatch.Draw(deadBugTextures[i], )
+                _spriteBatch.Draw(deadBugTextures[i], deadBugs[i], Color.White);
             for (int i = 0; i < bugs.Count; i++)
                 _spriteBatch.Draw(bugTextures[i], bugs[i], Color.White);
 
