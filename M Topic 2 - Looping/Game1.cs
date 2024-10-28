@@ -40,6 +40,7 @@ namespace M_Topic_2___Looping
                 bugs.Add(new Rectangle(x[i], y[i], size[i], size[i]));
             }
 
+            IsMouseVisible = false;
 
             base.Initialize();
         }
@@ -129,7 +130,7 @@ namespace M_Topic_2___Looping
             }
 
             //clicking
-            if (mouseState.LeftButton == ButtonState.Pressed)
+            if (mouseState.LeftButton == ButtonState.Pressed && prevMouseState.LeftButton != ButtonState.Pressed)
             {
                 for (int i = 0; i < bugs.Count; i++)
                 {
