@@ -209,7 +209,7 @@ namespace M_Topic_2___Looping
             }
 
             if (screen == Screen.Death)
-                if (mouseState.LeftButton == ButtonState.Pressed)
+                if (mouseState.LeftButton == ButtonState.Pressed && prevMouseState.LeftButton != ButtonState.Pressed)
                 {
                     screen = Screen.Game;
                     timer = 10;
